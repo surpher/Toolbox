@@ -1,0 +1,53 @@
+name: "Build and Test"
+
+on:
+  push:
+    branches:
+      - 'main'
+
+jobs:
+  run_tests:
+    name: "Run tests"
+    runs-on: ${{ matrix.runs-on }}
+
+    strategy:
+      fail-fast: true
+      matrix:
+        runs-on:
+          - macos-12
+          - macos-13
+          - macos-14
+          - ubuntu-latest
+
+        include:
+          - host: macos-12
+            swift-version: '5.8.1'
+
+          - host: macos-13
+            swift-version: '5.9.2'
+
+          - host: macos-14
+            swift-version: '5.10'
+
+          - host: ubuntu-latest
+            swift-version: '5.10'
+
+    concurrency:
+        group: toolbox_tests-${{ matrix.runs-on }}-${{ github.ref }}
+        cancel-in-progress: true
+
+    steps:
+        - name: "🧑‍💻  Checkout repository"
+          id: repo-checkout
+          uses: actions/checkout@v3
+
+        - name: "🧰  Setup swift"
+          id: setup-swift
+          uses: swift-actions/setup-swift@v2
+          with:
+            swift-version: ${{ matrix.swift-version }}
+
+        - name: "🧪  Run tests"
+          id: run-tests
+          run: |
+            swift test

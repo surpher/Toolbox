@@ -1,5 +1,9 @@
 import Foundation
+#if os(Linux)
+import SwiftCrypto
+#else
 import CryptoKit
+#endif
 
 public enum Crypto {
 
